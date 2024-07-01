@@ -38,17 +38,18 @@ if __name__ == '__main__':
     st.title('회의록 내용 요약')
   
     df=pd.read_csv('minutes_test.csv', encoding='utf-8')
-    display=df.iloc[:,2]
+    display=df.iloc[:,1]
     options=df.iloc[:,3]
-    minutes=st.selectbox('조회할 회의록', options, format_func=lambda x: display[df.iloc[:, 3] == x].values[0])
+    minutes=st.selectbox('조회할 회의록', options, format_func=lambda x: display[df.iloc[:, 3] == x].values[0])[:500]
+
     if minutes:
         preset_text = [{"role":"system","content":"- 데이터를 해독하고, 파싱하여 핵심 내용을 추출합니다."},{"role":"user","content":minutes}]
-
+        
         request_data = {
             'messages': preset_text,
             'topP': 0.6,
             'topK': 0,
-            'maxTokens': 4096,
+            'maxTokens': 500,
             'temperature': 0.1,
             'repeatPenalty': 1.2,
             'stopBefore': [],
@@ -57,5 +58,5 @@ if __name__ == '__main__':
         }
 
         result = completion_executor.execute(request_data)
-        r=json.loads(result[-4][5:])
-        st.chat_message('assistant').write(r['message']['content'])
+        st.write(json.loads(result[-4][5:])['message']['content'])
+        
